@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/contact.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <title>Contact Form</title>
+</head>
+
+
+<body>
+
+   <!-- Contact Section -->
+<section class="contact-cont">
+    <div class="form-contact-container">
+        
+        <!-- Contact Header -->
+        <div class="contact-header">
+            <h2 class="title">Let's talk</h2>
+            <p class="subtitle">Ask us anything or just say hi...</p>
+        </div>
+
+        <div class="form-wrapper">
+            <!-- Contact Form -->
+            <form id="contactForm" class="contact-form">
+
+                <!-- Name Input Fields -->
+                <div class="contact-input-flex">
+                    <input type="text" id="firstname" class="input-field contact-input-field" placeholder="First Name*">
+                    <input type="text" id="lastname" class="input-field contact-input-field" placeholder="Last Name*">
+                </div>
+
+                <!-- Email and Phone Number Input Fields -->
+                <div class="contact-input-flex">
+                    <input type="email" id="email" class="input-field contact-input-field" placeholder="Your Email*">
+                    <input type="text" id="number" class="input-field contact-input-field" placeholder="Your number*">
+                </div>
+
+                <!-- Message Input Field -->
+                <textarea id="message" class="textarea-field contact-input-field" rows="4" placeholder="Your Message*"></textarea>
+
+                <!-- Submit Button with Send Icon -->
+                <button type="submit" class="submit-button">
+                    Send
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-send-fill" viewBox="0 0 16 16">
+                        <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z"/>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Response Message Display Area -->
+            <p id="responseMsg" class="response-message"></p>
+        </div>
+    </div>
+</section>
+
+
+    <script>
+        document.getElementById("contactForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            let firstname = document.getElementById("firstname").value.trim();
+            let lastname = document.getElementById("lastname").value.trim();
+            let email = document.getElementById("email").value.trim();
+            let number = document.getElementById("number").value.trim();
+            let message = document.getElementById("message").value.trim();
+            let responseMsg = document.getElementById("responseMsg");
+            let submitButton = document.querySelector(".submit-button");
+            let inputs = document.querySelectorAll(".input-field, .textarea-field");
+
+            // **Loader Show**
+            submitButton.innerHTML = 'Sending... <span class="loader"></span>';
+            submitButton.disabled = true;
+
+
+            // **Basic Validations**
+            let formValid = true;
+            inputs.forEach(input => {
+                if (input.value.trim() === "") {
+                    input.style.borderColor = "red"; // Set border color to red if empty
+                    formValid = false;
+                }
+            });
+
+            if (!formValid) {
+                responseMsg.innerText = "All fields are required!";
+                responseMsg.style.color = "red";
+                resetButton(submitButton);
+                return; // Stop further execution if fields are empty
+            }
+
+            if (!/^\S+@\S+\.\S+$/.test(email)) {
+                responseMsg.innerText = "Invalid email format!";
+                responseMsg.style.color = "red";
+                resetButton(submitButton);
+                return; // Stop if email format is incorrect
+            }
+
+            if (!/^\d+$/.test(number)) {
+                responseMsg.innerText = "Invalid phone number!";
+                responseMsg.style.color = "red";
+                resetButton(submitButton);
+                return; // Stop if phone number is invalid
+            }
+
+
+            let serialNo = Date.now(); // Using timestamp as SerialNo
+            let timestamp = new Date().toLocaleString(); //Current date and time 
+            let uniqueId = crypto.randomUUID(); // Generate a unique ID
+            let product = "yasist";
+            // **FormData Setup**
+            let formData = new FormData();
+            formData.append("SerialNo", serialNo);
+            formData.append("Timestamp", timestamp);
+            formData.append("UniqueId", uniqueId);
+            formData.append("Product", product);
+            formData.append("FirstName", firstname);
+            formData.append("LastName", lastname);
+            formData.append("EmailId", email);
+            formData.append("PhoneNumber", number);
+            formData.append("Message", message);
+
+            // **Google Apps Script API URL**
+            let apiUrl = "https://script.google.com/macros/s/AKfycbyM4luwLhsfVd-17jJcj08YVtBd4xIfxNM4plvaxyHZ93q02LKiWUaMy-zFTU5WTR99GQ/exec";
+
+            try {
+                let response = await fetch(apiUrl, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Server error. Try again later.");
+
+                let result = await response.json();
+                console.log(result);
+
+                if (result.result === "success") {
+                    responseMsg.innerText = "Message sent successfully!";
+                    responseMsg.style.color = "green";
+                    document.getElementById("contactForm").reset();
+
+                    // **Reset Border Colors After Success**
+                    inputs.forEach(input => input.style.borderColor = "#000");
+
+                    setTimeout(() => responseMsg.innerText = "", 5000);
+                } else {
+                    throw new Error("Error sending message.");
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                responseMsg.innerText = error.message || "Network Error.";
+                responseMsg.style.color = "red";
+            }
+
+            resetButton(submitButton);
+        });
+
+        // **Helper Function to Reset Submit Button**
+        function resetButton(button) {
+            button.innerHTML = `Send <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-send-fill" viewBox="0 0 16 16">
+                        <path
+                            d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471z" />
+                    </svg>`;
+            button.disabled = false;
+        }
+
+        // Real-time input validation for border color changes
+        document.querySelectorAll(".input-field, .textarea-field").forEach(input => {
+            input.addEventListener("input", function () {
+
+                if (this.value.trim() !== "") {
+                    this.style.borderColor = "green"; // Change border to green if input is not empty
+                } else {
+                    this.style.borderColor = "red"; // Keep border red if input is empty
+                }
+
+                // Check if all fields are filled, and clear the error message
+                let allFieldsFilled = true;
+                document.querySelectorAll(".input-field, .textarea-field").forEach(field => {
+                    if (field.value.trim() === "") {
+                        allFieldsFilled = false;
+                    }
+                });
+
+                // If all fields are filled, clear the error message
+                if (allFieldsFilled) {
+                    responseMsg.innerText = ""; // Clear the error message in real-time
+                }
+            });
+        });
+
+
+
+    </script>
+
+
+
+
+
+</body>
+
+</html>

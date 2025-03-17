@@ -1,0 +1,7 @@
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+
+1.Copy and paste the given <link> elements inside the <head> section of your index.html file.
+
+2.Move the favicon folder into the nexus folder in your project structure.
